@@ -1,10 +1,22 @@
 import request from "supertest";
+import mongoose from "mongoose";
 import app from "../src/app.js";
+import User from "../src/models/User.js";
+import Task from "../src/models/Task.js";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.test" });
 
 let token;
 let taskId;
 
 beforeAll(async () => {
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(process.env.MONGO_URI);
+  }
+  await User.deleteMany({});
+  await Task.deleteMany({});
+
   // Register
   await request(app)
     .post("/api/auth/register")
@@ -23,6 +35,10 @@ beforeAll(async () => {
     });
 
   token = res.body.token;
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
 });
 
 describe("Task Routes", () => {
