@@ -1,7 +1,23 @@
 import request from "supertest";
+import mongoose from "mongoose";
 import app from "../src/app.js";
+import User from "../src/models/User.js";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.test" });
 
 describe("Auth Routes", () => {
+
+  beforeAll(async () => {
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGO_URI);
+    }
+    await User.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+  });
 
   let token;
 
